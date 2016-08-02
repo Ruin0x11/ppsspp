@@ -1098,6 +1098,23 @@ add_library(xxhash STATIC
 )
 include_directories(ext/xxhash)
 
+include_directories(/usr/lib/jvm/java-8-openjdk/include)
+include_directories(/usr/lib/jvm/java-8-openjdk/include/linux)
+
+find_package(JNI)
+
+if (JNI_FOUND)
+    message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
+    message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
+endif()
+
+add_library(psp SHARED
+        clojure/clojure.cpp
+        ../java/headers/com_ruin_psp_PSP.h)
+include_directories(../java/headers)
+include_directories(clojure)
+
+
 set(CoreExtra)
 set(CoreExtraLibs)
 
