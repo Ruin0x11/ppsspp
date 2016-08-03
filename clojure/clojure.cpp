@@ -59,15 +59,7 @@ static bool isInInterval(u32 start, u32 end, u32 value)
 	return start <= value && value < end;
 }
 
-jint Java_com_ruin_psp_PSP_readRAM(JNIEnv *env, jclass clazz, jint address) {
-	u32 start = PSP_GetUserMemoryBase() + (u32)address;
-        u32 size = 16;
-        printf("0x%08X\n", start);
-
-	auto memLock = Memory::Lock();
-	if (!PSP_IsInited())
-		return 0;
-
+static bool checkStart(u32 start, u32 size) {
 	bool invalidSize = false;
 	bool invalidAddress = false;
 
@@ -88,12 +80,53 @@ jint Java_com_ruin_psp_PSP_readRAM(JNIEnv *env, jclass clazz, jint address) {
 	if (invalidAddress)
 	{
 		printf("Invalid address 0x%08X.\n",start);
-		return 0;
+		return false;
 	} else if (invalidSize)
 	{
 		printf("Invalid end address 0x%08X.\n",start+size);
-		return 0;
+		return false;
 	}
+        return true;
+}
 
-	return (jint) *Memory::GetPointer(start);
+jint Java_com_ruin_psp_PSP_readRAMU8(JNIEnv *env, jclass clazz, jint address) {
+	u32 start = PSP_GetUserMemoryBase() + (u32)address;
+        u32 size = 8;
+
+	auto memLock = Memory::Lock();
+	if (!PSP_IsInited())
+		return 0;
+
+        if (!checkStart(start, size))
+          return 0;
+
+	return (jint) Memory::Read_U8(start);
+}
+
+jint Java_com_ruin_psp_PSP_readRAMU16(JNIEnv *env, jclass clazz, jint address) {
+	u32 start = PSP_GetUserMemoryBase() + (u32)address;
+        u32 size = 16;
+
+	auto memLock = Memory::Lock();
+	if (!PSP_IsInited())
+		return 0;
+
+        if (!checkStart(start, size))
+          return 0;
+
+	return (jint) Memory::Read_U16(start);
+}
+
+jlong Java_com_ruin_psp_PSP_readRAMU32(JNIEnv *env, jclass clazz, jint address) {
+	u32 start = PSP_GetUserMemoryBase() + (u32)address;
+        u32 size = 32;
+
+	auto memLock = Memory::Lock();
+	if (!PSP_IsInited())
+		return 0;
+
+        if (!checkStart(start, size))
+          return 0;
+
+	return (jlong) Memory::Read_U32(start);
 }
