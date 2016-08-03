@@ -942,6 +942,11 @@ int main(int argc, char *argv[]) {
 #endif
   EnableFZ();
 
+  while(true) {
+    step();
+  }
+  shutdown();
+
   return 0;
 }
 

@@ -368,7 +368,7 @@ if(WIN32)
 		Common/stdafx.h)
 endif()
 
-add_library(Common STATIC
+add_library(Common SHARED
 	${CommonExtra}
 	Common/ColorConv.cpp
 	Common/ColorConv.h
@@ -413,8 +413,8 @@ if(NOT USING_GLES2)
 	include_directories(${OPENGL_INCLUDE_DIR})
 	find_package(GLEW)
 	if(NOT GLEW_FOUND)
-		add_definitions(-DGLEW_STATIC)
-		add_library(glew STATIC
+		add_definitions(-DGLEW_SHARED)
+		add_library(glew SHARED
 			ext/native/ext/glew/GL/glew.h
 			ext/native/ext/glew/GL/glxew.h
 			ext/native/ext/glew/GL/wglew.h
@@ -1799,7 +1799,7 @@ add_library(psp SHARED
 include_directories(../java/headers)
 include_directories(clojure)
 
-target_link_libraries(psp native ${CoreLibName})
+target_link_libraries(psp native ${CoreLibName} ${LinkCommon} ${LIBZIP_LIBRARY} ${ZLIB_LIBRARY} ${PNG_LIBRARY} rg_etc1 vjson snappy udis86 ${RT_LIB} ${GLEW_LIBRARIES} Common cityhash sfmt19937 xbrz xxhash ${CoreExtraLibs} ${OPENGL_LIBRARIES} ${X11_LIBRARIES} ${CMAKE_DL_LIBS})
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")

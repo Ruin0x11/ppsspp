@@ -17,7 +17,7 @@ void Java_com_ruin_psp_PSP_startEmulator(JNIEnv *env, jclass clazz, jstring path
   strcpy(imgName, _imgName);
  
   char* arguments[] = {"PPSSPPDL", imgName};
-  startEmu(2, arguments);
+  startEmu(1, arguments);
 }
 
 void Java_com_ruin_psp_PSP_step(JNIEnv *env, jclass clazz) {
