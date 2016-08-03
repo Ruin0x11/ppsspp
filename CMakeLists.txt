@@ -143,7 +143,7 @@ if(ANDROID)
 	set(CoreLinkType SHARED)
 else()
 	set(CoreLibName Core)
-	set(CoreLinkType STATIC)
+	set(CoreLinkType SHARED)
 endif()
 
 include_directories(ext/native)
@@ -909,7 +909,9 @@ if(ANDROID)
 	set(nativeExtra ${nativeExtra} ${NativeAppSource})
 endif()
 
-add_library(native STATIC
+set(nativeExtra ${nativeExtra} ${NativeAppSource})
+
+add_library(native SHARED
 	${nativeExtra}
 	ext/native/base/backtrace.cpp
 	ext/native/base/backtrace.h
