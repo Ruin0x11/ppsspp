@@ -394,7 +394,6 @@ void ToggleFullScreenIfFlagSet() {
 }
 
 void step() {
-  printf("PPSSPP: single step\n");
   input_state.accelerometer_valid = false;
   input_state.mouse_valid = true;
 
@@ -620,14 +619,23 @@ void step() {
   framecount++;
 } 
 
-void step(int key) {
+void step(int keyCode) {
+  KeyInput key;
+  key.flags = KEY_DOWN;
+  auto mapped = KeyMapRawSDLtoNative.find(keyCode);
+  if (mapped == KeyMapRawSDLtoNative.end() || mapped->second == NKCODE_UNKNOWN) {
+    step();
+    return;
+  }
+  key.keyCode = mapped->second;
+  key.deviceId = DEVICE_ID_KEYBOARD;
+  NativeKey(key);
   step();
 }
 
 void shutdown() {
-  printf("PPSSPP: shutdown\n");
 #ifndef _WIN32
-    delete joystick;
+  delete joystick;
 #endif
   NativeShutdownGraphics();
   graphicsContext->Shutdown();
@@ -941,11 +949,6 @@ int main(int argc, char *argv[]) {
   }
 #endif
   EnableFZ();
-
-  while(true) {
-    step();
-  }
-  shutdown();
 
   return 0;
 }

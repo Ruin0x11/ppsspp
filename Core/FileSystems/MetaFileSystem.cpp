@@ -227,6 +227,7 @@ bool MetaFileSystem::MapFilePath(const std::string &_inpath, std::string &outpat
 
 	if ( RealPath(*currentDirectory, inpath, realpath) )
 	{
+
 		std::string prefix = realpath;
 		size_t prefixPos = realpath.find(':');
 		if (prefixPos != realpath.npos)

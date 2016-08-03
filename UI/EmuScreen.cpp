@@ -70,6 +70,8 @@
 #include "Windows/MainWindow.h"
 #endif
 
+extern bool g_TakeScreenshot;
+
 EmuScreen::EmuScreen(const std::string &filename)
 	: bootPending_(true), gamePath_(filename), invalid_(true), quit_(false), pauseTrigger_(false), saveStatePreviewShownTime_(0.0), saveStatePreview_(nullptr) {
 	memset(axisState_, 0, sizeof(axisState_));
@@ -410,6 +412,9 @@ void EmuScreen::onVKeyDown(int virtualKeyCode) {
 	case VIRTKEY_TOGGLE_FULLSCREEN:
 		System_SendMessage("toggle_fullscreen", "");
 		break;
+        case VIRTKEY_DUMP:
+          g_TakeScreenshot = true;
+          break;
 	}
 }
 
@@ -561,7 +566,7 @@ void EmuScreen::pspKey(int pspKeyCode, int flags) {
 			onVKeyUp(pspKeyCode);
 		}
 	} else {
-		// ILOG("pspKey %i %i", pspKeyCode, flags);
+		ILOG("pspKey %i %i", pspKeyCode, flags);
 		if (flags & KEY_DOWN)
 			__CtrlButtonDown(pspKeyCode);
 		if (flags & KEY_UP)

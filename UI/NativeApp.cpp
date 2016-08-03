@@ -72,6 +72,7 @@
 #include "Core/Core.h"
 #include "Core/FileLoaders/DiskCachingFileLoader.h"
 #include "Core/Host.h"
+#include "Core/MemMap.h"
 #include "Core/SaveState.h"
 #include "Core/Screenshot.h"
 #include "Core/System.h"
@@ -470,7 +471,7 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 		logman->SetLogLevel(LogTypes::G3D, LogTypes::LERROR);
 		logman->SetLogLevel(LogTypes::SCEGE, LogTypes::LERROR);
 	}
-	// Allow the lang directory to be overridden for testing purposes (e.g. Android, where it's hard to 
+	// Allow the lang directory to be overridden for testing purposes (e.g. Android, where it's hard to
 	// test new languages without recompiling the entire app, which is a hassle).
 	const std::string langOverridePath = g_Config.memStickDirectory + "PSP/SYSTEM/lang/";
 
@@ -645,8 +646,10 @@ void NativeShutdownGraphics() {
 
 void TakeScreenshot() {
 	g_TakeScreenshot = false;
+        printf("SHOT\n");
 
-#if defined(_WIN32) || (defined(USING_QT_UI) && !defined(MOBILE_DEVICE))
+        // odd.
+// #if defined(_WIN32) || (defined(USING_QT_UI) && !defined(MOBILE_DEVICE))
 	std::string path = GetSysDirectory(DIRECTORY_SCREENSHOT);
 	while (path.length() > 0 && path.back() == '/') {
 		path.resize(path.size() - 1);
@@ -682,7 +685,39 @@ void TakeScreenshot() {
 		I18NCategory *err = GetI18NCategory("Error");
 		osm.Show(err->T("Could not save screenshot file"));
 	}
-#endif
+// #endif
+
+        // now, dump the ram
+        u32 start, size;
+
+	char ramname[2048];
+	while (i < 10000){
+		snprintf(ramname, sizeof(ramname), "%s/%s_%05d.dump", path.c_str(), gameId.c_str(), i);
+		FileInfo info;
+		if (!getFileInfo(ramname, &info))
+			break;
+		i++;
+	}
+        start = PSP_GetUserMemoryBase();
+        size = PSP_GetUserMemoryEnd()-start;
+
+	auto memLock = Memory::Lock();
+	if (!PSP_IsInited())
+		return;
+
+	FILE* output = fopen(ramname,"wb");
+	if (output == NULL) {
+		char errorMessage[2048];
+		snprintf(errorMessage, sizeof(errorMessage), "Could not open file \"%s\".",ramname);
+                printf("%s\n", errorMessage);
+		return;
+	}
+
+	bool priorDumpWasStepping = Core_IsStepping();
+	if (!priorDumpWasStepping) Core_EnableStepping(true); // If emulator isn't paused force paused state
+	fwrite(Memory::GetPointer(start), 1, size, output);
+	fclose(output);
+	if (!priorDumpWasStepping) Core_EnableStepping(false); // If emulator wasn't paused before memory dump resume emulation automatically.
 }
 
 void DrawDownloadsOverlay(UIContext &dc) {
@@ -834,7 +869,7 @@ bool NativeTouch(const TouchInput &touch) {
 }
 
 bool NativeKey(const KeyInput &key) {
-	// ILOG("Key code: %i flags: %i", key.keyCode, key.flags);
+	ILOG("Key code: %i flags: %i", key.keyCode, key.flags);
 #if !defined(MOBILE_DEVICE)
 	if (g_Config.bPauseExitsEmulator) {
 		static std::vector<int> pspKeys;
@@ -859,7 +894,7 @@ bool NativeAxis(const AxisInput &axis) {
 
 	// only handle tilt events if tilt is enabled.
 	if (g_Config.iTiltInputType == TILT_NULL) {
-		// if tilt events are disabled, then run it through the usual way. 
+		// if tilt events are disabled, then run it through the usual way.
 		if (screenManager) {
 			return screenManager->axis(axis);
 		} else {
@@ -903,7 +938,7 @@ bool NativeAxis(const AxisInput &axis) {
 			//don't handle this now as only landscape is enabled.
 			//TODO: make this generic.
 			return false;
-			
+
 		case JOYSTICK_AXIS_OUYA_UNKNOWN1:
 		case JOYSTICK_AXIS_OUYA_UNKNOWN2:
 		case JOYSTICK_AXIS_OUYA_UNKNOWN3:
@@ -925,7 +960,7 @@ bool NativeAxis(const AxisInput &axis) {
 	//then a value of 70-80 is the way to go.
 	float xSensitivity = g_Config.iTiltSensitivityX / 50.0;
 	float ySensitivity = g_Config.iTiltSensitivityY / 50.0;
-	
+
 	//now transform out current tilt to the calibrated coordinate system
 	Tilt trueTilt = GenTilt(baseTilt, currentTilt, g_Config.bInvertTiltX, g_Config.bInvertTiltY, g_Config.fDeadzoneRadius, xSensitivity, ySensitivity);
 

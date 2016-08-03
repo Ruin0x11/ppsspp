@@ -383,6 +383,8 @@ namespace SaveState
 
 	void LoadSlot(const std::string &gameFilename, int slot, Callback callback, void *cbUserData)
 	{
+
+          printf("SLOT: %d\n", slot);
 		std::string fn = GenerateSaveSlotFilename(gameFilename, slot, STATE_EXTENSION);
 		if (!fn.empty()) {
 			Load(fn, callback, cbUserData);
