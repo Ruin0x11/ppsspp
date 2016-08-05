@@ -690,6 +690,7 @@ const KeyMap_IntStrPair psp_button_names[] = {
 	{VIRTKEY_AXIS_SWAP, "AxisSwap"},
 	{VIRTKEY_DEVMENU, "DevMenu"},
 	{VIRTKEY_DUMP, "Dump RAM"},
+	{VIRTKEY_SAVE_STATE_FILE, "Save State File"},
 };
 
 const int AXIS_BIND_NKCODE_START = 4000;

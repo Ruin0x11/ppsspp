@@ -44,6 +44,7 @@ SDLJoystick *joystick = NULL;
 #include "Core/System.h"
 #include "Core/Core.h"
 #include "Core/Config.h"
+#include "Core/HLE/sceCtrl.h"
 #include "Common/GraphicsContext.h"
 
 #include "Remote.h"
@@ -617,19 +618,16 @@ void step() {
   time_update();
   t = time_now();
   framecount++;
-} 
+}
 
-void step(int keyCode) {
-  KeyInput key;
-  key.flags = KEY_DOWN;
-  auto mapped = KeyMapRawSDLtoNative.find(keyCode);
-  if (mapped == KeyMapRawSDLtoNative.end() || mapped->second == NKCODE_UNKNOWN) {
-    step();
-    return;
-  }
-  key.keyCode = mapped->second;
-  key.deviceId = DEVICE_ID_KEYBOARD;
-  NativeKey(key);
+void step(int keys, int prevKeys, float analogX, float analogY) {
+  u32 keysDown = (~prevKeys) & keys;
+  u32 keysUp = (~keys) & prevKeys;
+  // printf("%d %d\n", keys, CTRL_DOWN);
+  __CtrlButtonDown(keysDown);
+  __CtrlButtonUp(keysUp);
+  __CtrlSetAnalogX(analogX);
+  __CtrlSetAnalogY(analogY);
   step();
 }
 
@@ -782,7 +780,7 @@ int main(int argc, char *argv[]) {
       set_dpi = -2;
     if (!strcmp(argv[i],"--scale"))
       set_scale = -2;
-	
+
     if (!strcmp(argv[i],"--ipad"))
       set_ipad = true;
     if (!strcmp(argv[i],"--portrait"))

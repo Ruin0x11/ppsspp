@@ -68,6 +68,8 @@ namespace SaveState
 	// Warning: callback will be called on a different thread.
 	void Rewind(Callback callback = Callback(), void *cbUserData = 0);
 
+	void SaveScreenshot(const std::string &filename, Callback callback, void *cbUserData);
+
 	// Returns true if there are rewind snapshots available.
 	bool CanRewind();
 

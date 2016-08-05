@@ -45,6 +45,7 @@
 #include "GPU/GLES/Framebuffer.h"
 #include "Core/HLE/sceCtrl.h"
 #include "Core/HLE/sceDisplay.h"
+#include "Core/HLE/sceKernel.h"
 #include "Core/HLE/sceSas.h"
 #include "Core/Debugger/SymbolMap.h"
 #include "Core/SaveState.h"
@@ -71,6 +72,8 @@
 #endif
 
 extern bool g_TakeScreenshot;
+
+typedef std::function<void(bool status, const std::string &message, void *cbUserData)> Callback;
 
 EmuScreen::EmuScreen(const std::string &filename)
 	: bootPending_(true), gamePath_(filename), invalid_(true), quit_(false), pauseTrigger_(false), saveStatePreviewShownTime_(0.0), saveStatePreview_(nullptr) {
@@ -414,6 +417,28 @@ void EmuScreen::onVKeyDown(int virtualKeyCode) {
 		break;
         case VIRTKEY_DUMP:
           g_TakeScreenshot = true;
+          break;
+        case VIRTKEY_SAVE_STATE_FILE:
+                int i = 0;
+                char savename[2048];
+                char shotname[2048];
+                std::string path = GetSysDirectory(DIRECTORY_SAVESTATE);
+                std::string gameId = g_paramSFO.GetValueString("DISC_ID");
+                while (i < 10000){
+                        snprintf(savename, sizeof(savename), "%s/%s_%05d.ppst", path.c_str(), gameId.c_str(), i);
+                        FileInfo info;
+                        if (!getFileInfo(savename, &info))
+                                break;
+                        i++;
+                }
+                  SaveState::Save(savename, [](bool status, const std::string &message, void *) {
+                      if(!message.empty()) {
+                        osm.Show(message, 2.0);
+                      }
+                    });
+
+                snprintf(shotname, sizeof(shotname), "%s/%s_%05d.jpg", path.c_str(), gameId.c_str(), i);
+                SaveState::SaveScreenshot(shotname, Callback(), 0);
           break;
 	}
 }
