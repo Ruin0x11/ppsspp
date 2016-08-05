@@ -144,7 +144,7 @@ jint Java_com_ruin_psp_PSP_readRAMU16(JNIEnv *env, jclass clazz, jint address) {
   return (jint) Memory::Read_U16(start);
 }
 
-jlong Java_com_ruin_psp_PSP_readRAMU32(JNIEnv *env, jclass clazz, jint address) {
+jint Java_com_ruin_psp_PSP_readRAMU32(JNIEnv *env, jclass clazz, jint address) {
   u32 start = PSP_GetUserMemoryBase() + (u32)address;
   u32 size = 32;
 
@@ -155,7 +155,7 @@ jlong Java_com_ruin_psp_PSP_readRAMU32(JNIEnv *env, jclass clazz, jint address) 
   if (!checkStart(start, size))
     return 0;
 
-  return (jlong) Memory::Read_U32(start);
+  return (jint) Memory::Read_U32(start);
 }
 
 jfloat Java_com_ruin_psp_PSP_readRAMU32Float (JNIEnv *env, jclass clazz, jint address) {
