@@ -73,6 +73,17 @@ void Java_com_ruin_psp_PSP_loadSaveState(JNIEnv *env, jclass clazz, jstring file
     });
 }
 
+
+void Java_com_ruin_psp_PSP_saveSaveState (JNIEnv *env, jclass clazz, jstring filename) {
+  std::string str;
+  GetJStringContent(env,filename,str);
+  SaveState::Save(str, [](bool status, const std::string &message, void *) {
+      if(!message.empty()) {
+        puts(message.c_str());
+      }
+    });
+}
+
 void Java_com_ruin_psp_PSP_setFramelimit (JNIEnv *env, jclass clazz, jboolean framelimit) {
   if(framelimit) {
     PSP_CoreParameter().fpsLimit = 1;
